@@ -7,6 +7,12 @@ const {
   OTP_SECRET, PORT = 3000,
 } = process.env;
 
+const missing = ['MSG91_AUTHKEY','MSG91_INTEGRATED_NUMBER','MSG91_TEMPLATE_NAME','MSG91_NAMESPACE','OTP_SECRET'].filter((k) => !process.env[k]);
+if (missing.length) {
+  console.error('Missing env vars: ' + missing.join(', '));
+  process.exit(1);
+}
+
 const MSG91_URL = 'https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/';
 const MOBILE_RE = /^[6-9]\d{9}$/;
 const COOLDOWN_MS = 30 * 1000;
