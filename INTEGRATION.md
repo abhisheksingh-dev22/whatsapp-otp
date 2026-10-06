@@ -57,8 +57,8 @@ Body: see `sendWhatsApp()` in `backend/server.js`.
 - Treat non-2xx or `hasError: true` as failure and return 502.
 - Recipient format is `91` + 10-digit mobile.
 
-## Configuration: Railway environment variables
-Set these as Railway service variables on the production backend. Do not commit them,
+## Configuration: environment variables
+Set these as environment variables on the production backend. Do not commit them,
 and do not put them in any frontend environment file.
 
 | Variable | Value |
@@ -67,14 +67,14 @@ and do not put them in any frontend environment file.
 | `MSG91_INTEGRATED_NUMBER` | `919909166223` |
 | `MSG91_TEMPLATE_NAME` | `admformotp` |
 | `MSG91_NAMESPACE` | WhatsApp template namespace |
-| `OTP_SECRET` | long random string (secret), e.g. 64 hex chars |
+| `OTP_SECRET` | our own HMAC key (not from MSG91): any long random string, e.g. `openssl rand -hex 32`. Keep it stable across deployments; changing it invalidates pending OTPs (10-min lifetime). |
 
 Read them from the environment through the backend's existing configuration mechanism
 (for .NET: `IConfiguration` / `Options` pattern; env var names map via `__` if nested).
-Fail fast at startup if any are missing. Railway sets `PORT` itself.
+Fail fast at startup if any are missing.
 
 ## Production changes required (differences from this harness)
-1. **OTP storage**: the harness uses an in-memory Map. On Railway (restarts, redeploys,
+1. **OTP storage**: the harness uses an in-memory Map. In production (restarts, redeploys,
    possibly multiple instances) that loses OTPs and breaks cooldown/attempt counts.
    Use the backend's existing database (or Redis if already available) with columns:
    mobile, otp_hash, expires_at, attempts, sent_at. Make the send/verify updates atomic
