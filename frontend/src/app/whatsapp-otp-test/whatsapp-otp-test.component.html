@@ -1,0 +1,38 @@
+<main class="card">
+  <h1>WhatsApp OTP test</h1>
+
+  @if (verified()) {
+    <p class="success">Mobile verified: {{ form.controls.mobile.value }}</p>
+    <button type="button" (click)="reset()">Start over</button>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="step() === 1 ? send() : verify()">
+      <label for="mobile">Mobile number</label>
+      <input id="mobile" formControlName="mobile" inputmode="numeric" maxlength="10" placeholder="10-digit mobile" />
+      @if (form.controls.mobile.touched && form.controls.mobile.invalid) {
+        <small class="err">Enter a valid 10-digit mobile number.</small>
+      }
+
+      @if (step() === 1) {
+        <button type="submit" [disabled]="loading()">Send OTP on WhatsApp</button>
+      } @else {
+        <label for="otp">Enter OTP</label>
+        <input id="otp" formControlName="otp" inputmode="numeric" maxlength="6" placeholder="6-digit OTP" autocomplete="one-time-code" />
+        @if (form.controls.otp.touched && form.controls.otp.invalid) {
+          <small class="err">Enter the 6-digit OTP.</small>
+        }
+
+        <div class="row">
+          <button type="submit" [disabled]="loading()">Verify</button>
+          <button type="button" class="secondary" (click)="send()" [disabled]="loading() || timer() > 0">
+            Resend OTP{{ timer() > 0 ? ' (' + timer() + 's)' : '' }}
+          </button>
+        </div>
+        <a href="#" (click)="$event.preventDefault(); changeNumber()">Change number</a>
+      }
+    </form>
+
+    @if (error()) {
+      <p class="err" role="alert">{{ error() }}</p>
+    }
+  }
+</main>
